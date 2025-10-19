@@ -8,6 +8,8 @@ const state = {
   favorites: JSON.parse(localStorage.getItem("favorites") || "[]")
 };
 
+let hourlyChart = null;
+
 const cfg = window.APP_CONFIG;
 const cityInput = $("#city-input");
 const searchForm = $("#search-form");
@@ -22,6 +24,7 @@ const OW_GEO = q => `https://api.openweathermap.org/geo/1.0/direct?q=${encodeURI
 const OW_CURRENT = (lat,lon) => `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=${cfg.OPENWEATHER_API_KEY}`;
 const OW_ICON = id => `https://openweathermap.org/img/wn/${id}@2x.png`;
 const OM_DAILY = (lat,lon)=>`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=weathercode,temperature_2m_max,temperature_2m_min&timezone=auto&forecast_days=7`;
+const OM_HOURLY = (lat,lon)=>`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=temperature_2m&forecast_days=1&timezone=auto`;
 
 const codeToEmoji = c=>{
   if([0].includes(c)) return "☀️";
@@ -44,7 +47,6 @@ function setTheme(c,isNight){
 }
 
 async function getJSON(url){ const r=await fetch(url); if(!r.ok) throw new Error("Request failed"); return r.json(); }
-
 async function geocodeCity(city){
   const arr = await getJSON(OW_GEO(city));
   if(!arr.length) throw new Error("City not found");
@@ -54,6 +56,7 @@ async function geocodeCity(city){
 
 async function getCurrent(lat,lon){ return getJSON(OW_CURRENT(lat,lon)); }
 async function getDaily(lat,lon){ return getJSON(OM_DAILY(lat,lon)); }
+async function getHourly(lat,lon){ return getJSON(OM_HOURLY(lat,lon)); }
 
 function renderCurrent(label, j){
   const t=j.main.temp, desc=j.weather[0].description, icon=j.weather[0].icon;
@@ -84,11 +87,45 @@ function renderForecast(daily){
     </div>`).join("");
 }
 
+function renderHourlyChart(hours, temps) {
+  const ctx = document.getElementById("hourlyChart").getContext("2d");
+  if (hourlyChart) hourlyChart.destroy();
+  const data = state.unit === "F" ? temps.map(c => (c * 9) / 5 + 32) : temps;
+  const label = state.unit === "F" ? "Temperature (°F)" : "Temperature (°C)";
+  hourlyChart = new Chart(ctx, {
+    type: "line",
+    data: {
+      labels: hours,
+      datasets: [{
+        label,
+        data,
+        borderWidth: 2,
+        tension: 0.3,
+        pointRadius: 0,
+        borderColor: "#38bdf8",
+        fill: false,
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { title: { display: true, text: "Hour" } },
+        y: { title: { display: true, text: label } }
+      }
+    }
+  });
+}
+
 async function loadByCoords(lat,lon,label=""){
   state.lastCoords={lat,lon};
   try{
-    const [cw,fd]=await Promise.all([getCurrent(lat,lon),getDaily(lat,lon)]);
-    renderCurrent(label,cw); renderForecast(fd);
+    const [cw,fd,hd]=await Promise.all([getCurrent(lat,lon),getDaily(lat,lon),getHourly(lat,lon)]);
+    renderCurrent(label,cw);
+    renderForecast(fd);
+    const hours = hd.hourly.time.map(t => new Date(t).getHours());
+    const temps = hd.hourly.temperature_2m;
+    renderHourlyChart(hours, temps);
   }catch(e){currentEl.textContent=e.message; forecastEl.innerHTML="";}
 }
 
@@ -126,4 +163,3 @@ favAddBtn.onclick=addFavorite;
 
 renderFavorites();
 handleSearch("Lahti");
-

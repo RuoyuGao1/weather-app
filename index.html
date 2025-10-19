@@ -4,12 +4,13 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Weather App — Lahti Default</title>
-  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="./css/style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
   <header class="container">
     <h1>Weather App</h1>
-    <p class="subtitle">Lahti by default • Search • GPS • 7-day forecast • °C/°F • Theme • Favorites</p>
+    <p class="subtitle">Lahti by default • Search • GPS • 7-day forecast • 24h chart • °C/°F • Theme • Favorites</p>
   </header>
 
   <main class="container">
@@ -38,10 +39,15 @@
       <h2>7-Day Forecast</h2>
       <div id="forecast-grid" class="forecast-grid"></div>
     </section>
+
+    <section id="hourly" class="card">
+      <h2>24-Hour Temperature</h2>
+      <canvas id="hourlyChart" height="140"></canvas>
+    </section>
   </main>
 
   <footer class="container">
-    <p class="muted">Data: OpenWeather (current) & Open-Meteo (7-day). Built by Ruoyu Gao.</p>
+    <p class="muted">Data: OpenWeather (current) & Open-Meteo (7-day & hourly). Built by Ruoyu Gao.</p>
   </footer>
 
   <script src="./js/config.js"></script>

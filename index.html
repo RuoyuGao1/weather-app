@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Weather App — Lahti Default</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <header class="container">
+    <h1>Weather App</h1>
+    <p class="subtitle">Lahti by default • Search • GPS • 7-day forecast • °C/°F • Theme • Favorites</p>
+  </header>
+
+  <main class="container">
+    <section class="controls">
+      <form id="search-form" autocomplete="off">
+        <input id="city-input" type="text" placeholder="Enter a city..." required />
+        <button id="search-btn" type="submit">Search</button>
+      </form>
+      <div class="quick-actions">
+        <button id="geo-btn" type="button">Use my location</button>
+        <button id="unit-btn" type="button" data-unit="C">°C</button>
+        <button id="fav-add-btn" type="button">★ Save current</button>
+      </div>
+      <div class="favorites">
+        <label>Favorites:</label>
+        <div id="fav-list" class="chips"></div>
+      </div>
+    </section>
+
+    <section id="current" class="card">
+      <h2>Current Weather</h2>
+      <div id="current-content" class="placeholder">Loading default city (Lahti)…</div>
+    </section>
+
+    <section id="forecast" class="card">
+      <h2>7-Day Forecast</h2>
+      <div id="forecast-grid" class="forecast-grid"></div>
+    </section>
+  </main>
+
+  <footer class="container">
+    <p class="muted">Data: OpenWeather (current) & Open-Meteo (7-day). Built by Ruoyu Gao.</p>
+  </footer>
+
+  <script src="./js/config.js"></script>
+  <script src="./js/app.js" defer></script>
+</body>
+</html>
